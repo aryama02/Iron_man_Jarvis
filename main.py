@@ -1,46 +1,61 @@
-import pyttsx3
-import wikipedia as wiki
-from functions import auto_greeting, speak, opening_webs, ask_ollama, opening_apps, get_weather, take_command
-import ollama
-import os 
+import random
+from functions import (
+    auto_greeting, speak, ask_ollama, take_command, 
+    opening_webs, opening_apps, get_weather
+)
 
 def main():
-    model= "deepseek-r1:8b"
+    print(" Voice Assistant Starting...")
     auto_greeting("Aryan")
+    
     while True:
-        rec = take_command().lower()
-        print(rec)
+        rec = take_command()
+        
         if rec is None:
             continue
-        if rec:
-            opening_webs(rec)
-            opening_apps(rec)
         
-
+        print(f"You said: {rec}")
+        
+        # Exit commands
+        if any(word in rec for word in ["exit", "quit", "bye", "goodbye", "stop"]):
+            speak(random.choice(["Goodbye!", "See you later!", "Take care!"]))
+            break
+        
+        # Open commands (apps/websites)
+        open_triggers = ["open", "launch", "start", "run"]
+        if any(trigger in rec for trigger in open_triggers):
+            # Extract app/site name
+            app_or_site = rec
+            for trigger in open_triggers:
+                app_or_site = app_or_site.replace(trigger, "")
+            app_or_site = app_or_site.replace("please", "").replace("can you", "").replace("could you", "").strip()
+            
+            # Try website first, then app
+            if opening_webs(app_or_site):
+                speak(random.choice([f"Opening {app_or_site}", "On it", "Sure"]))
+            elif opening_apps(app_or_site):
+                speak(f"Opening {app_or_site}")
+            else:
+                speak(f"I couldn't find {app_or_site}")
+            continue
+        
+        # Weather command
         if "weather" in rec:
-            speak("Let me check the weather for you")
-        
-            if "in" in rec:
-                city = rec.split("in", 1)[1].strip()
+            speak("Let me check that for you")
+            
+            if " in " in rec:
+                city = rec.split(" in ", 1)[1].strip()
                 weather_result = get_weather(city)
             else:
                 weather_result = get_weather()
-            print("Weather:", weather_result)
+            
             speak(weather_result)
             continue
-
-        if "from wikipedia" in rec:
-            speak("searching wikipedia. please wait...")
-            rec = rec.replace("wikipedia", "")
-            result = wiki.summary(rec, sentences=2)
-            speak(result)
         
+        # Everything else goes to Ollama
         response = ask_ollama(rec)
-        print("Ollama says:", response)
+        print(f"Assistant: {response}")
         speak(response)
-
-        
-
 
 if __name__ == "__main__":
     main()

@@ -5,18 +5,20 @@ import ollama
 import os 
 import requests
 import speech_recognition as sr
+import subprocess
 
 def speak(text):
     engine = pyttsx3.init()
     voices = engine.getProperty('voices')
-    engine.setProperty('voice', voices[1].id) #changing index changes voices but ony 0 and 1 are working here
+    engine.setProperty('voice', voices[1].id)
     engine.say(text)
     engine.runAndWait()
 
 def take_command():
     r = sr.Recognizer()
-    r.pause_threshold = 1.0
+    r.pause_threshold = 2.0
     with sr.Microphone() as src:
+        r.adjust_for_ambient_noise(src, duration=0.5)
         print("Say something")
         audio = r.listen(src)
     try:
@@ -41,9 +43,9 @@ def auto_greeting(name="user"):
 
     if 5 <= hour < 12:
         greet = f"Goodmorning, {name} !"
-    elif 12 <= 18:
+    elif 12 <= hour < 18:
         greet = f"Good afternoon, {name}!"
-    elif 18 <= 22:
+    elif 18 <= hour < 22:
         greet = f"Good Evening, {name}!"
     else:
         greet = f"Hello {name} how can I help you at this hour?"
@@ -79,25 +81,99 @@ def ask_ollama(question):
         print(f"Ollama error: {e}")
         return "I ran into an issue connecting to the model."
 
-def opening_webs(query):
+def _find_in_start_menu(app_name):
+    app_name = app_name.lower()
+    search_paths = [
+        os.path.join(os.environ["ProgramData"], r"Microsoft\Windows\Start Menu\Programs"),
+        os.path.join(os.environ["AppData"], r"Microsoft\Windows\Start Menu\Programs")
+    ]
+    
+    for path in search_paths:
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                if app_name in file.lower() and file.endswith(".lnk"):
+                    try:
+                        os.startfile(os.path.join(root, file))
+                        return True
+                    except Exception:
+                        continue
+    return False
 
-    if "open youtube" in query:
-        webbrowser.open("www.youtube.com")
+def opening_apps(app_name):
+    """Open apps using Windows search or Start Menu scan"""
+    try:
+        command = f'powershell -Command "Start-Process \'{app_name}\' -ErrorAction Stop"'
+        subprocess.run(command, shell=True, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return True
+    except subprocess.CalledProcessError:
+        pass 
+    except Exception:
+        pass
 
-    if "open facebook" in query:
-        webbrowser.open("www.facebook.com")
-
-    if "open twitch" in query:
-        webbrowser.open("www.twitch.com")
+    
+    return _find_in_start_menu(app_name)
 
 
-def opening_apps(query):
-    if "open spotify" in query: 
-        os.startfile(r"C:\Users\aryan\AppData\Local\Microsoft\WindowsApps\Spotify.exe")
-    if "open vscode" in query:   
-        os.startfile(r"C:\Users\aryan\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Visual Studio Code")
-    if "open chrome" in query:
-        os.startfile(r"C:\Program Files\Google\Chrome\Application")
+def opening_webs(site_name):
+    """Open websites"""
+    websites = {
+        "youtube": "www.youtube.com",
+        "facebook": "www.facebook.com", 
+        "twitch": "www.twitch.com",
+        "google": "www.google.com",
+        "twitter": "www.twitter.com",
+        "instagram": "www.instagram.com"
+    }
+    
+    for key, url in websites.items():
+        if key in site_name.lower():
+            webbrowser.open(url)
+            return True
+    return False
+
+
+def handle_command(query):
+    """Detect and handle commands smartly. Returns True if command was handled."""
+    query_lower = query.lower()
+    
+    # Exit commands
+    if any(word in query_lower for word in ["exit", "quit", "bye", "goodbye", "stop"]):
+        speak("Goodbye!")
+        return "EXIT"
+    
+    # Weather commands
+    if "weather" in query_lower:
+        response = get_weather()
+        speak(response)
+        return True
+    
+    # Detect "open" intent - multiple ways of asking
+    open_triggers = ["open", "launch", "start", "run", "can you open", "could you open", "please open"]
+    is_open_command = any(trigger in query_lower for trigger in open_triggers)
+    
+    if is_open_command:
+        # Extract what to open
+        app_or_site = query_lower
+        for trigger in open_triggers:
+            app_or_site = app_or_site.replace(trigger, "")
+        app_or_site = app_or_site.replace("please", "").replace("can you", "").replace("could you", "").strip()
+        
+        # Try opening as website first (common sites)
+        if opening_webs(app_or_site):
+            speak(f"Opening {app_or_site}")
+            return True
+        
+        # Try opening as app
+        if opening_apps(app_or_site):
+            speak(f"Opening {app_or_site}")
+            return True
+        
+        # If nothing worked
+        speak(f"I couldn't find {app_or_site}")
+        return True
+    
+    # Not a command, let Ollama handle it
+    return False
 
 
 def get_weather(location=None):
@@ -138,11 +214,3 @@ def get_weather(location=None):
             return output
     except Exception as e:
         return f"An error occurred: {e}"    
-
-
-
-
-
-
-
-
