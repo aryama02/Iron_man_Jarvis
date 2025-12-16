@@ -35,10 +35,10 @@ def voice_assistant_loop():
             # Broadcast the recognized text
             manager.broadcast_sync({"status": "recognized", "text": rec})
 
-            if any(word in rec for word in ["exit", "quit", "bye", "goodbye", "stop", "see you later", "bye bye", "see you", "I gotta go", "I have to go now"]):
-                speak(random.choice(["Goodbye!", "See you later!", "Take care!"]))
-                # Ideally, we should stop the server too, but for now just break the loop
-                break
+            # if any(word in rec for word in ["exit", "quit", "bye", "goodbye", "stop", "see you later", "bye bye", "see you", "I gotta go", "I have to go now"]):
+            #     speak(random.choice(["Goodbye!", "See you later!", "Take care!"]))
+            #     # Ideally, we should stop the server too, but for now just break the loop
+            #     break
             
             # Open commands (apps/websites)
             open_triggers = ["open", "launch", "start", "run"]
