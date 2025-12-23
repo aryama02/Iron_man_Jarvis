@@ -1,4 +1,44 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+
+function TypewriterText({ text, status }: { text: string; status: string }) {
+  const [displayText, setDisplayText] = useState('');
+  const targetText = useRef(text);
+  const timer = useRef<number | null>(null);
+
+  useEffect(() => {
+    targetText.current = text;
+
+    // If text is shorter than what we're displaying (e.g. a reset or new sequence)
+    // we reset the display text.
+    if (!text || !text.startsWith(displayText)) {
+      setDisplayText('');
+    }
+  }, [text, displayText]);
+
+  useEffect(() => {
+    if (timer.current) window.clearInterval(timer.current);
+
+    timer.current = window.setInterval(() => {
+      setDisplayText((prev) => {
+        if (prev.length < targetText.current.length) {
+          return prev + targetText.current.charAt(prev.length);
+        }
+        return prev;
+      });
+    }, 45);
+
+    return () => {
+      if (timer.current) window.clearInterval(timer.current);
+    };
+  }, []);
+
+  return (
+    <div className={`status-text ${status} ${displayText !== text ? 'typing' : ''}`}>
+      <span className="text-content">{displayText}</span>
+      <span className="cursor">-</span>
+    </div>
+  );
+}
 
 function App() {
   const [status, setStatus] = useState('idle');
@@ -37,7 +77,7 @@ function App() {
   return (
     <>
       <div className={`cover ${status}`}>
-        <div className="status-text">{text}</div>
+        <TypewriterText text={text} status={status} />
         <div className="arcReactor">
           <div className="triangle"></div>
           <div className="component-1">

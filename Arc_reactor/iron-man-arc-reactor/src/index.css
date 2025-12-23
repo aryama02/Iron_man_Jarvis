@@ -62,10 +62,8 @@ body {
   width: 200px;
   height: 200px;
   border-radius: 50%;
-  background: linear-gradient(
-    rgba(105, 241, 241, 0.8),
-    rgba(99, 193, 223, 0.8)
-  );
+  background: linear-gradient(rgba(105, 241, 241, 0.8),
+      rgba(99, 193, 223, 0.8));
   animation: animation-2 2s linear infinite;
 }
 
@@ -83,10 +81,8 @@ body {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: linear-gradient(
-    rgba(105, 241, 241, 0.8),
-    rgba(99, 193, 223, 0.8)
-  );
+  background: linear-gradient(rgba(105, 241, 241, 0.8),
+      rgba(99, 193, 223, 0.8));
 }
 
 .component-1 .innerComponent:nth-child(1) {
@@ -327,6 +323,7 @@ body {
   from {
     transform: rotate(360deg);
   }
+
   to {
     transform: rotate(0);
   }
@@ -336,6 +333,7 @@ body {
   from {
     transform: rotate(0);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -345,12 +343,15 @@ body {
   0% {
     transform: translate(-50%, -50%) rotate(0);
   }
+
   30% {
     transform: translate(-50%, -50%) rotate(360deg);
   }
+
   50% {
     transform: translate(-50%, -50%) rotate(0);
   }
+
   100% {
     transform: translate(-50%, -50%) rotate(360deg);
   }
@@ -362,6 +363,7 @@ body {
   filter: brightness(1.5);
   box-shadow: 0 0 50px #69f1f1;
 }
+
 .cover.listening .component-6::after {
   border-color: #fff;
   animation-duration: 1s;
@@ -373,33 +375,101 @@ body {
 .cover.processing .component-5 {
   animation-duration: 0.5s;
 }
+
 .cover.processing .component-1 {
   background: linear-gradient(rgba(241, 105, 105, 0.8), rgba(223, 99, 99, 0.8));
 }
 
 /* State: Speaking (Pulse Intensity) */
 .cover.speaking .arcReactor {
-    animation: speak-pulse 0.5s infinite alternate;
+  animation: speak-pulse 0.5s infinite alternate;
 }
+
 @keyframes speak-pulse {
-    from { transform: scale(1); filter: brightness(1); }
-    to { transform: scale(1.05); filter: brightness(1.3); }
+  from {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+
+  to {
+    transform: scale(1.10);
+    filter: brightness(1.8);
+  }
 }
 
 /* Text Display */
 .status-text {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: #69f1f1;
-    font-family: 'Inter', sans-serif;
-    font-size: 1.5rem;
-    text-shadow: 0 0 10px #69f1f1;
-    z-index: 1000;
-    text-align: center;
-    width: 80%;
-    background: rgba(0,0,0,0.5);
-    padding: 10px;
-    border-radius: 10px;
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #69f1f1;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5rem;
+  text-shadow: 0 0 10px #69f1f1, 0 0 20px rgba(105, 241, 241, 0.5);
+  z-index: 1000;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  text-align: center;
+  width: 80%;
+  min-height: 2rem;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.status-text.typing {
+  animation: digital-glitch 0.5s infinite alternate;
+}
+
+.status-text .cursor {
+  display: inline-block;
+  width: 10px;
+  height: 1.5rem;
+  background-color: #69f1f1;
+  animation: blink 0.8s infinite step-end;
+  margin-left: 5px;
+  box-shadow: 0 0 10px #69f1f1;
+}
+
+.status-text.speaking {
+  text-shadow: 0 0 15px #69f1f1, 0 0 30px #69f1f1;
+  transition: text-shadow 0.3s ease;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes digital-glitch {
+  0% {
+    transform: translateX(-50%) translate(0);
+  }
+
+  20% {
+    transform: translateX(-50%) translate(-2px, 1px);
+  }
+
+  40% {
+    transform: translateX(-50%) translate(-2px, -1px);
+  }
+
+  60% {
+    transform: translateX(-50%) translate(2px, 1px);
+  }
+
+  80% {
+    transform: translateX(-50%) translate(2px, -1px);
+  }
+
+  100% {
+    transform: translateX(-50%) translate(0);
+  }
 }
