@@ -1,4 +1,4 @@
-# 🤖 JARVIS: Voice Assistant with ARC Reactor UI
+#  JARVIS: Voice Assistant with ARC Reactor UI
 
 A high-tech, voice-controlled assistant inspired by Iron Man's JARVIS. This project features a stunning, interactive Arc Reactor UI that reacts to your voice in real-time.
 
